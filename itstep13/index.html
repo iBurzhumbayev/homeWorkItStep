@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <style>
+        .colorblock{
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .blockheader{
+            height: 34px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        input{
+            width: 250px;
+        }
+
+        #saveButton{
+            width: 208px;
+            margin-top: 10px;
+        }
+
+        #typeSelection{
+            width: 258px;
+        }
+
+        .allcolors{
+            width: 700px;
+            display: grid;
+            row-gap: 50px;
+            grid-template-columns: auto auto auto;
+            grid-auto-rows: 150px;
+            margin: 0 auto;
+        }
+
+        .colorBox{
+            border: 2px solid grey;
+            width: 200px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .innerbox{
+            width: 100px;
+            height: 126px;
+            text-align: center;
+            background-color: rgba(246, 244, 245, 0.4);
+        }
+
+        #colorError{
+            color: red;
+        }
+    </style>
+    <div class="colorblock">
+        <p>Create new color</p>
+
+        <div class="insetblock">
+            <div class="blockheader">
+                <p>Color:</p>
+                <p id="colorError"></p>
+            </div>
+            <input type="text" name="" id="Color">
+        </div>
+
+        <div class="insetblock">
+            <div class="blockheader">
+                <p>Type:</p>
+            </div>
+            <select id="typeSelection">
+                <option>RGB</option>
+                <option>RGBA</option>
+                <option>HEX</option>
+            </select>
+        </div>
+
+        <div class="insetblock">
+            <div class="blockheader">
+                <p>Code:</p>
+                <p id="codeError">Test</p>
+            </div>
+            <input type="text" name="" id="Code">
+        </div>
+
+        <input id="saveButton" type="button" value="Save">
+    </div>
+    <div class="allcolors">
+        
+    </div>
+    <script>
+        let color = document.querySelector("#Color")
+let type = document.querySelector("#typeSelection")
+let code = document.querySelector("#Code")
+
+let save = document.querySelector("#saveButton")
+let allcolors = document.querySelector(".allcolors")
+
+let colorerror = document.querySelector("#colorError")
+let codeerror = document.querySelector("#codeError")
+
+save.addEventListener("click", function(){
+    let mycolor = {
+        color: color.value,
+        type: type.value,
+        code: code.value
+    }
+    let colors = []
+    if(checkData(mycolor)){//Тутсделаем проверку на заполнение типа check data 
+        if(localStorage.getItem("colors") === null){
+            colors.push(mycolor);
+            localStorage.setItem("colors", JSON.stringify(colors));
+            createbox()
+            colorerror.innerText = ""
+            codeerror.innerText = ""
+        }else{
+            colors = JSON.parse(localStorage.getItem("colors"));
+            colors.push(mycolor);
+            localStorage.setItem("colors", JSON.stringify(colors));
+            colorerror.innerText = ""
+            codeerror.innerText = ""
+            createbox()
+        }
+    }
+})
+if(localStorage.getItem("colors") !== null){
+    createbox()
+}
+
+
+function createbox(){
+    let collorsgrid = document.querySelector(`.allcolors`)
+    collorsgrid.innerHTML = ""
+    let allcolors = JSON.parse(localStorage.getItem("colors"));
+    allcolors.forEach((el) => {
+        let colorcode = ''
+        if(el.type == "RGBA"){
+            colorcode = "rgba"
+        }else if(el.type == "RGB"){
+            colorcode = "rgb"
+        }else{
+            colorcode = "hex"
+        }
+        collorsgrid.innerHTML += `
+        <div class="colorBox" style="background-color: ${colorcode}(${el.code});">
+        <div class="innerbox">
+        <p>${el.color}</p>
+        <p>${el.type}</p>
+        <p>${el.code}</p>
+        </div></div>`
+    })
+}
+
+
+function checkData(mycolor) {
+    if(!validatecolorname(mycolor.color)){
+        colorerror.innerText = "color can contain only letters"
+        return false
+    }else if(!validatetype(mycolor.type,mycolor.code)){
+        codeerror.innerText = "Wrong pattern"
+        return false
+    }else{
+        return true
+    }
+}
+
+const validatecolorname = (color) => {
+    return String(color)
+        .match(
+            /[a-zA-Z]/
+        )};
+//
+const validatetype = (type,code) =>{
+    if(type = "RGB"){
+        let reg = /^(\d{1,3}), (\d{1,3}), (\d{1,3})$/
+            return reg.test(code)
+
+        }else if(type = "RGBA"){
+            let reg = /^(\d{1,3}), (\d{1,3}), (\d{1,3}), (\S{1,3})$/
+            return reg.test(code)
+    }else{ 
+        let reg = /^#([0-9a-f]{3,6})$/
+        return reg.test(code)
+    }
+}
+    </script>
+</body>
+</html>
